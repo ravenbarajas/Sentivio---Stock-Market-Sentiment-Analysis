@@ -43,4 +43,83 @@ class MarketDataController extends Controller
             'data' => $marketData
         ]);
     }
+
+    public function getStockData($symbol)
+    {
+        // Verify that the symbol is a stock (not an ETF)
+        $isStock = DB::table('symbols_valid_meta')
+            ->where('symbol', $symbol)
+            ->where(function($query) {
+                $query->where('is_etf', false)->orWhereNull('is_etf');
+            })
+            ->exists();
+
+        if (!$isStock) {
+            return response()->json(['error' => 'Symbol is not a stock'], 400);
+        }
+
+        // Get market data for the stock
+        $marketData = DB::table('market_price')
+            ->where('symbol', $symbol)
+            ->where(function($query) {
+                $query->where('is_etf', false)->orWhereNull('is_etf');
+            })
+            ->orderBy('date')
+            ->get([
+                'date',
+                'open',
+                'high',
+                'low',
+                'close',
+                'adj_close',
+                'volume'
+            ]);
+
+        if ($marketData->isEmpty()) {
+            return response()->json(['error' => 'No data found for this stock'], 404);
+        }
+
+        return response()->json([
+            'symbol' => $symbol,
+            'data' => $marketData
+        ]);
+    }
+
+    // This is a general method that can handle both stocks and ETFs
+    public function getMarketData($symbol)
+    {
+        // Get symbol information
+        $symbolInfo = DB::table('symbols_valid_meta')
+            ->where('symbol', $symbol)
+            ->first();
+
+        if (!$symbolInfo) {
+            return response()->json(['error' => 'Symbol not found'], 400);
+        }
+
+        // Get market data for the symbol
+        $marketData = DB::table('market_price')
+            ->where('symbol', $symbol)
+            ->orderBy('date')
+            ->get([
+                'date',
+                'open',
+                'high',
+                'low',
+                'close',
+                'adj_close',
+                'volume'
+            ]);
+
+        if ($marketData->isEmpty()) {
+            return response()->json(['error' => 'No market data found for this symbol'], 404);
+        }
+
+        return response()->json([
+            'symbol' => $symbol,
+            'security_name' => $symbolInfo->security_name ?? null,
+            'is_etf' => $symbolInfo->is_etf ?? false,
+            'data' => $marketData
+        ]);
+    }
 } 
