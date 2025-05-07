@@ -1,7 +1,9 @@
 import React from 'react';
 import './App.css';
-import EtfGraph from './components/EtfGraph';
+import MarketDataDashboard from './components/MarketDataDashboard';
 import './components/EtfGraph.css';
+import './components/StockGraph.css';
+import './components/CryptoGraph.css';
 
 function App() {
   return (
@@ -10,7 +12,7 @@ function App() {
         <h1>Stock Sentiment Analysis</h1>
       </header>
       <main className="App-main">
-        <EtfGraph />
+        <MarketDataDashboard />
       </main>
       <footer className="App-footer">
         <p>© 2025 Stock Sentiment Analysis</p>
