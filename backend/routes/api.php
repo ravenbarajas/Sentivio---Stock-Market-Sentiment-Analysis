@@ -21,4 +21,5 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::get('/etf-data/{symbol}', [MarketDataController::class, 'getEtfData']);
 Route::get('/stock-data/{symbol}', [MarketDataController::class, 'getStockData']);
+Route::get('/crypto-data/{symbol}', [MarketDataController::class, 'getCryptoData']);
 Route::get('/market-data/{symbol}', [MarketDataController::class, 'getMarketData']);

@@ -85,6 +85,37 @@ class MarketDataController extends Controller
         ]);
     }
 
+    public function getCryptoData($symbol)
+    {
+        // For cryptocurrencies, we'll use a format like BTC-USD or ETH-USD
+        // Extract the crypto symbol from the format
+        $cryptoSymbol = explode('-', $symbol)[0];
+        
+        // Get market data for the cryptocurrency
+        $marketData = DB::table('market_price')
+            ->where('symbol', $symbol)
+            ->orderBy('date')
+            ->get([
+                'date',
+                'open',
+                'high',
+                'low',
+                'close',
+                'adj_close',
+                'volume'
+            ]);
+
+        if ($marketData->isEmpty()) {
+            return response()->json(['error' => 'No data found for this cryptocurrency'], 404);
+        }
+
+        return response()->json([
+            'symbol' => $symbol,
+            'crypto_symbol' => $cryptoSymbol,
+            'data' => $marketData
+        ]);
+    }
+
     // This is a general method that can handle both stocks and ETFs
     public function getMarketData($symbol)
     {
