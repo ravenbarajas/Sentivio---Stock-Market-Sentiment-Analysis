@@ -42,7 +42,14 @@ const EtfGraph = () => {
     
     try {
       const response = await axios.get(`/api/etf-data/${symbol.toUpperCase()}`);
-      setMarketData(response.data);
+      console.log('ETF data response:', response.data);
+      
+      if (!response.data || !response.data.data || !Array.isArray(response.data.data) || response.data.data.length === 0) {
+        setError('No valid data received for this ETF');
+        setMarketData(null);
+      } else {
+        setMarketData(response.data);
+      }
     } catch (err) {
       console.error('Error fetching ETF data:', err);
       setError(err.response?.data?.error || 'Failed to fetch ETF data');
@@ -57,14 +64,14 @@ const EtfGraph = () => {
     datasets: [
       {
         label: 'Close Price',
-        data: marketData.data.map(item => item.close),
+        data: marketData.data.map(item => parseFloat(item.close) || 0),
         borderColor: 'rgb(75, 192, 192)',
         backgroundColor: 'rgba(75, 192, 192, 0.5)',
         tension: 0.1,
       },
       {
         label: 'Open Price',
-        data: marketData.data.map(item => item.open),
+        data: marketData.data.map(item => parseFloat(item.open) || 0),
         borderColor: 'rgb(255, 99, 132)',
         backgroundColor: 'rgba(255, 99, 132, 0.5)',
         tension: 0.1,
