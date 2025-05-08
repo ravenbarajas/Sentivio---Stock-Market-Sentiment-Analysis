@@ -1,0 +1,80 @@
+/* Base alert styles */
+.ui-alert {
+  position: relative;
+  width: 100%;
+  border-radius: var(--radius);
+  padding: 1rem;
+  border: 1px solid var(--border);
+}
+
+/* Alert variants */
+.ui-alert-default {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+.ui-alert-destructive {
+  border-color: var(--destructive);
+  color: var(--destructive);
+  background-color: rgba(239, 68, 68, 0.1);
+}
+
+/* Alert elements */
+.ui-alert-title {
+  margin-bottom: 0.25rem;
+  font-weight: 600;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: inherit;
+}
+
+.ui-alert-description {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: inherit;
+  opacity: 0.9;
+}
+
+/* When alert has an icon */
+.ui-alert-with-icon {
+  padding-left: 3rem;
+}
+
+.ui-alert-icon {
+  position: absolute;
+  left: 1rem;
+  top: 1rem;
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+/* Alert animations */
+.ui-alert-animate-in {
+  animation: alertAnimateIn 0.2s ease-in-out;
+}
+
+.ui-alert-animate-out {
+  animation: alertAnimateOut 0.2s ease-in-out forwards;
+}
+
+@keyframes alertAnimateIn {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes alertAnimateOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+} 

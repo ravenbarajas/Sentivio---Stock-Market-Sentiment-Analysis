@@ -1,0 +1,68 @@
+/* Select styles */
+.ui-select {
+  display: block;
+  height: 2.5rem;
+  width: 100%;
+  border-radius: var(--radius);
+  border: 1px solid var(--input);
+  background-color: var(--background);
+  padding: 0 0.75rem;
+  font-size: 0.875rem;
+  color: var(--foreground);
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%2364748B' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E%0A");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 10px 6px;
+  padding-right: 2rem;
+}
+
+.ui-select:focus {
+  outline: none;
+  border-color: var(--ring);
+  box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.1);
+}
+
+.ui-select[multiple] {
+  height: auto;
+  min-height: 2.5rem;
+  padding: 0.375rem;
+  background-image: none;
+  padding-right: 0.75rem;
+}
+
+.ui-select[multiple] option {
+  padding: 0.375rem 0.5rem;
+  border-radius: calc(var(--radius) * 0.75);
+  margin-bottom: 0.25rem;
+}
+
+.ui-select[multiple] option:checked {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.ui-select-option {
+  padding: 0.5rem 0.75rem;
+}
+
+.ui-select-group {
+  font-weight: 500;
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+
+/* Disabled state */
+.ui-select-disabled,
+.ui-select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: var(--muted);
+}
+
+.ui-select-option-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+} 

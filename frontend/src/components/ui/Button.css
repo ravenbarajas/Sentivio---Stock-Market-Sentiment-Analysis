@@ -1,0 +1,132 @@
+/* Base button styles */
+.ui-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius);
+  font-weight: 500;
+  font-size: 0.875rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  height: 2.5rem;
+  padding: 0 1rem;
+  border: none;
+  position: relative;
+  white-space: nowrap;
+}
+
+.ui-button:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* Button variants */
+.ui-button-default {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.ui-button-default:hover {
+  background-color: var(--primary);
+  opacity: 0.9;
+}
+
+.ui-button-destructive {
+  background-color: var(--destructive);
+  color: var(--destructive-foreground);
+}
+
+.ui-button-destructive:hover {
+  background-color: var(--destructive);
+  opacity: 0.9;
+}
+
+.ui-button-outline {
+  background-color: transparent;
+  border: 1px solid var(--border);
+  color: var(--foreground);
+}
+
+.ui-button-outline:hover {
+  background-color: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.ui-button-secondary {
+  background-color: var(--secondary);
+  color: var(--secondary-foreground);
+}
+
+.ui-button-secondary:hover {
+  background-color: var(--secondary);
+  opacity: 0.8;
+}
+
+.ui-button-ghost {
+  background-color: transparent;
+  color: var(--foreground);
+}
+
+.ui-button-ghost:hover {
+  background-color: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.ui-button-link {
+  background-color: transparent;
+  text-decoration: underline;
+  color: var(--primary);
+  padding: 0;
+  height: auto;
+}
+
+.ui-button-link:hover {
+  text-decoration: none;
+}
+
+/* Button sizes */
+.ui-button-default {
+  height: 2.5rem;
+  padding: 0 1rem;
+  font-size: 0.875rem;
+}
+
+.ui-button-sm {
+  height: 2rem;
+  padding: 0 0.75rem;
+  font-size: 0.75rem;
+}
+
+.ui-button-lg {
+  height: 3rem;
+  padding: 0 1.5rem;
+  font-size: 1rem;
+}
+
+.ui-button-icon {
+  height: 2.5rem;
+  width: 2.5rem;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ui-button-icon.ui-button-sm {
+  height: 2rem;
+  width: 2rem;
+}
+
+.ui-button-icon.ui-button-lg {
+  height: 3rem;
+  width: 3rem;
+}
+
+/* Disabled state */
+.ui-button-disabled,
+.ui-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+} 

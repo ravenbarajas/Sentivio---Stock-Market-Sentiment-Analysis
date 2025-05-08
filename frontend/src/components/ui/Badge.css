@@ -1,0 +1,56 @@
+/* Base badge styles */
+.ui-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+/* Badge variants */
+.ui-badge-default {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  border: 1px solid transparent;
+}
+
+.ui-badge-secondary {
+  background-color: var(--secondary);
+  color: var(--secondary-foreground);
+  border: 1px solid transparent;
+}
+
+.ui-badge-outline {
+  background-color: transparent;
+  border: 1px solid var(--border);
+  color: var(--foreground);
+}
+
+.ui-badge-destructive {
+  background-color: var(--destructive);
+  color: var(--destructive-foreground);
+  border: 1px solid transparent;
+}
+
+/* Interactive badges */
+.ui-badge[href] {
+  cursor: pointer;
+}
+
+.ui-badge[href]:hover {
+  opacity: 0.9;
+}
+
+/* With icons */
+.ui-badge svg,
+.ui-badge img {
+  height: 0.75rem;
+  width: 0.75rem;
+  margin-right: 0.25rem;
+} 
