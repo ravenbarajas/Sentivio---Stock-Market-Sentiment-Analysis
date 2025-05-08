@@ -1,0 +1,91 @@
+/* StatisticsCard styles */
+.ui-statistics-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.ui-statistics-content {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.ui-statistics-value-container {
+  display: flex;
+  flex-direction: column;
+  padding-right: 1rem;
+}
+
+.ui-statistics-value {
+  display: flex;
+  align-items: baseline;
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--foreground);
+  margin-bottom: 0.5rem;
+}
+
+.ui-statistics-unit {
+  margin-right: 0.25rem;
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: var(--muted-foreground);
+}
+
+.ui-statistics-change {
+  display: flex;
+  align-items: center;
+  font-size: 0.875rem;
+  font-weight: 500;
+  gap: 0.25rem;
+}
+
+.ui-statistics-change-positive {
+  color: var(--positive);
+}
+
+.ui-statistics-change-negative {
+  color: var(--negative);
+}
+
+.ui-statistics-change-neutral {
+  color: var(--muted-foreground);
+}
+
+.ui-statistics-change-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.ui-statistics-timeframe {
+  color: var(--muted-foreground);
+  margin-left: 0.25rem;
+}
+
+.ui-statistics-chart {
+  width: 120px;
+  height: 60px;
+  margin-top: auto;
+}
+
+/* With chart variant */
+.ui-statistics-card-with-chart .ui-statistics-value-container {
+  flex: 1;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .ui-statistics-value {
+    font-size: 1.5rem;
+  }
+  
+  .ui-statistics-unit {
+    font-size: 1rem;
+  }
+  
+  .ui-statistics-chart {
+    width: 80px;
+    height: 40px;
+  }
+} 

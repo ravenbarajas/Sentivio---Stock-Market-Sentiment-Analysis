@@ -1,0 +1,124 @@
+/* Chart container */
+.ui-chart {
+  position: relative;
+  width: 100%;
+  height: 300px;
+  border-radius: var(--radius);
+  background-color: var(--card-background);
+  padding: 1rem;
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+/* Chart types specific styling */
+.ui-chart-line,
+.ui-chart-bar {
+  height: 350px;
+}
+
+.ui-chart-pie,
+.ui-chart-doughnut,
+.ui-chart-polarArea {
+  height: 300px;
+}
+
+.ui-chart-radar {
+  height: 350px;
+}
+
+.ui-chart-scatter,
+.ui-chart-bubble {
+  height: 350px;
+}
+
+/* Chart color variables - can be customized in your root CSS */
+:root {
+  /* Primary dataset colors */
+  --chart-primary: hsl(221, 83%, 53%);
+  --chart-primary-transparent: hsla(221, 83%, 53%, 0.5);
+  --chart-secondary: hsl(142, 76%, 36%);
+  --chart-secondary-transparent: hsla(142, 76%, 36%, 0.5);
+  --chart-tertiary: hsl(31, 92%, 45%);
+  --chart-tertiary-transparent: hsla(31, 92%, 45%, 0.5);
+  --chart-quaternary: hsl(330, 79%, 50%);
+  --chart-quaternary-transparent: hsla(330, 79%, 50%, 0.5);
+  
+  /* Additional dataset colors */
+  --chart-color-1: hsl(262, 83%, 58%);
+  --chart-color-1-transparent: hsla(262, 83%, 58%, 0.5);
+  --chart-color-2: hsl(199, 89%, 48%);
+  --chart-color-2-transparent: hsla(199, 89%, 48%, 0.5);
+  --chart-color-3: hsl(355, 78%, 56%);
+  --chart-color-3-transparent: hsla(355, 78%, 56%, 0.5);
+  --chart-color-4: hsl(43, 96%, 56%);
+  --chart-color-4-transparent: hsla(43, 96%, 56%, 0.5);
+  --chart-color-5: hsl(172, 66%, 50%);
+  --chart-color-5-transparent: hsla(172, 66%, 50%, 0.5);
+  --chart-color-6: hsl(291, 64%, 42%);
+  --chart-color-6-transparent: hsla(291, 64%, 42%, 0.5);
+  
+  /* Special indicator colors */
+  --chart-positive: hsl(142, 76%, 36%);
+  --chart-positive-transparent: hsla(142, 76%, 36%, 0.1);
+  --chart-negative: hsl(355, 78%, 56%);
+  --chart-negative-transparent: hsla(355, 78%, 56%, 0.1);
+  --chart-neutral: hsl(215, 16%, 47%);
+  --chart-neutral-transparent: hsla(215, 16%, 47%, 0.1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .ui-chart {
+    height: 250px;
+    padding: 0.75rem;
+  }
+  
+  .ui-chart-line,
+  .ui-chart-bar,
+  .ui-chart-radar,
+  .ui-chart-scatter,
+  .ui-chart-bubble {
+    height: 300px;
+  }
+}
+
+/* Loading state and placeholder */
+.ui-chart-loading {
+  position: relative;
+}
+
+.ui-chart-loading::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--card-background);
+  opacity: 0.7;
+  z-index: 1;
+}
+
+.ui-chart-loading::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 30px;
+  height: 30px;
+  margin: -15px 0 0 -15px;
+  border: 3px solid var(--border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: chart-loading-spin 1s linear infinite;
+  z-index: 2;
+}
+
+@keyframes chart-loading-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+} 

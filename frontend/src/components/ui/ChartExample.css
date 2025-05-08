@@ -1,0 +1,88 @@
+/* Chart example container */
+.ui-chart-example {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+/* Section titles */
+.ui-chart-example-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  color: var(--foreground);
+  text-align: center;
+}
+
+.ui-chart-section {
+  margin-bottom: 2.5rem;
+}
+
+.ui-chart-section-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: var(--foreground);
+}
+
+/* Statistics grid */
+.ui-statistics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+}
+
+/* Chart grid */
+.ui-chart-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+}
+
+.ui-chart-grid-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.ui-chart-title {
+  font-size: 1.125rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+  color: var(--foreground);
+  text-align: center;
+}
+
+/* Chart type selector */
+.ui-chart-type-selector {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .ui-statistics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .ui-chart-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .ui-statistics-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .ui-chart-example-title {
+    font-size: 1.5rem;
+  }
+  
+  .ui-chart-section-title {
+    font-size: 1.25rem;
+  }
+} 
