@@ -1,40 +1,40 @@
 :root {
   /* Base colors */
   --background: #ffffff;
-  --foreground: #0f172a;
+  --foreground: #171717;
   
   /* Card colors */
   --card-background: #ffffff;
-  --card-foreground: #0f172a;
+  --card-foreground: #171717;
   
   /* Popover colors */
   --popover-background: #ffffff;
-  --popover-foreground: #0f172a;
+  --popover-foreground: #171717;
   
   /* Primary colors */
-  --primary: #0f172a;
-  --primary-foreground: #ffffff;
+  --primary: #171717;
+  --primary-foreground: #fafafa;
   
   /* Secondary colors */
-  --secondary: #f1f5f9;
-  --secondary-foreground: #0f172a;
+  --secondary: #f5f5f5;
+  --secondary-foreground: #171717;
   
   /* Muted colors */
-  --muted: #f1f5f9;
-  --muted-foreground: #64748b;
+  --muted: #f5f5f5;
+  --muted-foreground: #737373;
   
   /* Accent colors */
-  --accent: #f1f5f9;
-  --accent-foreground: #0f172a;
+  --accent: #f0f0f0;
+  --accent-foreground: #171717;
   
   /* Destructive colors */
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
   
   /* Border colors and radius */
-  --border: #e2e8f0;
-  --input: #e2e8f0;
-  --ring: #0f172a;
+  --border: #e5e5e5;
+  --input: #e5e5e5;
+  --ring: #a3a3a3;
   --radius: 0.5rem;
   
   /* Chart colors */
@@ -52,43 +52,43 @@
   --negative: #ef4444;
 }
 
-.dark {
+.dark-theme {
   /* Base colors */
-  --background: #020617;
-  --foreground: #f8fafc;
+  --background: #171717;
+  --foreground: #fafafa;
   
   /* Card colors */
-  --card-background: #0f172a;
-  --card-foreground: #f8fafc;
+  --card-background: #1e1e1e;
+  --card-foreground: #fafafa;
   
   /* Popover colors */
-  --popover-background: #0f172a;
-  --popover-foreground: #f8fafc;
+  --popover-background: #1e1e1e;
+  --popover-foreground: #fafafa;
   
   /* Primary colors */
-  --primary: #f8fafc;
-  --primary-foreground: #0f172a;
+  --primary: #fafafa;
+  --primary-foreground: #171717;
   
   /* Secondary colors */
-  --secondary: #1e293b;
-  --secondary-foreground: #f8fafc;
+  --secondary: #333333;
+  --secondary-foreground: #fafafa;
   
   /* Muted colors */
-  --muted: #1e293b;
-  --muted-foreground: #94a3b8;
+  --muted: #333333;
+  --muted-foreground: #a3a3a3;
   
   /* Accent colors */
-  --accent: #1e293b;
-  --accent-foreground: #f8fafc;
+  --accent: #2e2e2e;
+  --accent-foreground: #fafafa;
   
   /* Destructive colors */
   --destructive: #ef4444;
-  --destructive-foreground: #f8fafc;
+  --destructive-foreground: #fafafa;
   
   /* Border colors */
-  --border: #1e293b;
-  --input: #1e293b;
-  --ring: #cbd5e1;
+  --border: #333333;
+  --input: #333333;
+  --ring: #666666;
   
   /* Chart colors - same as light theme */
   --chart-primary: rgb(37, 99, 235);
