@@ -150,7 +150,9 @@ const MarketHeadlines = () => {
                     WebkitBoxOrient: 'vertical',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
-                    lineHeight: '1.4'
+                    lineHeight: '1.4',
+                    height: '2.8em',
+                    minHeight: '2.8em'
                   }}>
                     {headline.headline}
                   </p>
