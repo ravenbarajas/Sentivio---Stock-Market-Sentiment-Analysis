@@ -12,7 +12,9 @@ import {
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 import { useTheme } from './ui/ThemeProvider';
-import LiveFeed from './LiveFeed'; // Import LiveFeed component
+import AnalystRatings from './AnalystRatings'; // Import LiveFeed component
+import MarketHeadlines from './MarketHeadlines'; // Import LiveFeed component
+
 
 // Register ChartJS components
 ChartJS.register(
@@ -352,14 +354,19 @@ const StockChart = () => {
       padding: '20px',
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
       color: colors.text,
-      backgroundColor: 'transparent'
+      backgroundColor: 'transparent',
+      display: 'grid',
+      gridTemplateRows: 'auto auto',
+      gap: '1rem',
+      width: '100%',
+      maxWidth: '1800px',
+      margin: '0 auto'
     }}>
-      {/* Popular Stocks Card */}
+      {/* Row 1: Popular Stocks Card */}
       <div style={{
         borderRadius: '8px',
         boxShadow: isDarkMode ? '0 1px 3px rgba(0,0,0,0.3)' : '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
         overflow: 'hidden',
-        marginBottom: '1rem',
         backgroundColor: colors.background
       }}>
         <div style={{
@@ -450,260 +457,272 @@ const StockChart = () => {
         </div>
       </div>
 
-      {/* Main Stock Data Card */}
+      {/* Row 2: Three-column layout (Market Headlines, Stock Data, Analyst Ratings) */}
       <div style={{
-        borderRadius: '8px',
-        boxShadow: isDarkMode ? '0 1px 3px rgba(0,0,0,0.3)' : '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
-        overflow: 'hidden',
-        marginBottom: '1rem',
-        backgroundColor: colors.background
+        display: 'grid',
+        gridTemplateColumns: '1fr 2fr 1fr',
+        gap: '1rem',
       }}>
-        <div style={{
-          padding: '1rem',
-          borderBottom: `1px solid ${colors.border}`,
-          backgroundColor: colors.cardHeaderBackground
-        }}>
-          <h2 style={{
-            margin: '0 0 0 0',
-            fontSize: '1.5rem',
-            fontWeight: '600',
-            color: colors.text
-          }}>Stock Market Data</h2>
-          <p style={{
-            margin: '0',
-            fontSize: '0.875rem',
-            color: colors.mutedText
-          }}>Enter a symbol to view historical market data</p>
+        {/* Left Column: Market Headlines */}
+        <div>
+          <MarketHeadlines />
         </div>
-        {/* Main Card Body */}
+        
+        {/* Center Column: Main Stock Data Card */}
         <div style={{
-          padding: '1rem',
-          backgroundColor: colors.cardBackground,
-          // Removed flex and gap from here, children will stack naturally
+          borderRadius: '8px',
+          boxShadow: isDarkMode ? '0 1px 3px rgba(0,0,0,0.3)' : '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
+          overflow: 'hidden',
+          backgroundColor: colors.background
         }}>
-          {/* Search form */}
-          <form onSubmit={handleSubmit} style={{
-            display: 'flex',
-            gap: '0.5rem',
-            marginBottom: '1rem'
+          <div style={{
+            padding: '1rem',
+            borderBottom: `1px solid ${colors.border}`,
+            backgroundColor: colors.cardHeaderBackground
           }}>
-            <input
-              type="text"
-              placeholder="Enter stock symbol (e.g., AAPL)"
-              value={symbol}
-              onChange={(e) => setSymbol(e.target.value)}
-              style={{ 
-                flex: '1',
-                padding: '0.5rem 0.75rem',
-                fontSize: '1rem',
-                borderRadius: '4px',
-                border: `1px solid ${colors.border}`,
-                outline: 'none',
-                backgroundColor: isDarkMode ? '#3f3f46' : '#fff',
-                color: colors.text
-              }}
-            />
-            <button 
-              type="submit" 
-              style={{ 
-                padding: '0.5rem 1rem',
-                backgroundColor: loading ? (isDarkMode ? '#52525b' : '#6c757d') : colors.primary,
-                color: colors.buttonText,
-                border: 'none',
-                borderRadius: '4px',
-                fontSize: '1rem',
-                cursor: loading ? 'not-allowed' : 'pointer',
-                opacity: loading ? '0.65' : '1'
-              }}
-              disabled={loading}
-            >
-              {loading ? 'Loading...' : 'Get Data'}
-            </button>
-          </form>
-
-          {/* Error message display */}
-          {error && (
-            <div style={{ 
-              backgroundColor: isDarkMode ? 'rgba(248, 113, 113, 0.1)' : 'rgba(239, 68, 68, 0.1)', 
-              color: colors.dangerText,
-              borderRadius: '4px',
-              padding: '0.75rem 1rem',
+            <h2 style={{
+              margin: '0 0 0 0',
+              fontSize: '1.5rem',
+              fontWeight: '600',
+              color: colors.text
+            }}>Stock Market Data</h2>
+            <p style={{
+              margin: '0',
+              fontSize: '0.875rem',
+              color: colors.mutedText
+            }}>Enter a symbol to view historical market data</p>
+          </div>
+          {/* Main Card Body */}
+          <div style={{
+            padding: '1rem',
+            backgroundColor: colors.cardBackground,
+          }}>
+            {/* Search form */}
+            <form onSubmit={handleSubmit} style={{
+              display: 'flex',
+              gap: '0.5rem',
               marginBottom: '1rem'
             }}>
-              {error}
-            </div>
-          )}
+              <input
+                type="text"
+                placeholder="Enter stock symbol (e.g., AAPL)"
+                value={symbol}
+                onChange={(e) => setSymbol(e.target.value)}
+                style={{ 
+                  flex: '1',
+                  padding: '0.5rem 0.75rem',
+                  fontSize: '1rem',
+                  borderRadius: '4px',
+                  border: `1px solid ${colors.border}`,
+                  outline: 'none',
+                  backgroundColor: isDarkMode ? '#3f3f46' : '#fff',
+                  color: colors.text
+                }}
+              />
+              <button 
+                type="submit" 
+                style={{ 
+                  padding: '0.5rem 1rem',
+                  backgroundColor: loading ? (isDarkMode ? '#52525b' : '#6c757d') : colors.primary,
+                  color: colors.buttonText,
+                  border: 'none',
+                  borderRadius: '4px',
+                  fontSize: '1rem',
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                  opacity: loading ? '0.65' : '1'
+                }}
+                disabled={loading}
+              >
+                {loading ? 'Loading...' : 'Get Data'}
+              </button>
+            </form>
 
-          {/* Container for Chart and Latest Data (Flex Row) */}
-          {marketData && marketData.data && marketData.data.length > 0 && (
-            <div style={{
-              display: 'flex', // Arrange children (chart and data) in a row
-              width: '100%' // Ensure this container takes full width of parent
-            }}>
-              {/* Chart Container (80%) */}
-              <div style={{
-                width: '80%', 
-                flex: '0 0 80%', 
+            {/* Error message display */}
+            {error && (
+              <div style={{ 
+                backgroundColor: isDarkMode ? 'rgba(248, 113, 113, 0.1)' : 'rgba(239, 68, 68, 0.1)', 
+                color: colors.dangerText,
+                borderRadius: '4px',
+                padding: '0.75rem 1rem',
+                marginBottom: '1rem'
               }}>
-                <Line data={chartData} options={chartOptions} />
+                {error}
               </div>
+            )}
 
-              {/* Latest Data Column (20%) */}
-              {selectedDateData && (
+            {/* Container for Chart and Latest Data (Flex Row) */}
+            {marketData && marketData.data && marketData.data.length > 0 && (
+              <div style={{
+                display: 'flex', // Arrange children (chart and data) in a row
+                width: '100%' // Ensure this container takes full width of parent
+              }}>
+                {/* Chart Container (80%) */}
                 <div style={{
-                  width: '20%', 
-                  flex: '0 0 20%', 
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '0.5rem',
-                  padding: '0 0 0 1rem', // Add padding on the left to separate from chart
-                  height: '100%', // Maximize height
+                  width: '80%', 
+                  flex: '0 0 80%', 
                 }}>
-                  {/* Latest Data Header */}
-                  <h3 style={{
-                    margin: '0 0 0.5rem 0',
-                    fontSize: '1rem',
-                    fontWeight: '600',
-                    color: colors.text
-                  }}>Latest Data ({selectedDateData.date})</h3>
+                  <Line data={chartData} options={chartOptions} />
+                </div>
 
-                  {/* Price Change Display - Now dynamic based on selected date */}
-                  {selectedDateData && marketData && marketData.data && (
-                    (() => {
-                      const dailyChange = calculateDailyChange(selectedDateData, marketData.data);
-                      if (!dailyChange) return null;
-                      return (
-                        <div 
-                          key={'daily-change-' + selectedDateData.date} // Unique key based on date to ensure re-render
-                          style={{
-                          textAlign: 'center',
-                          marginBottom: '1rem', // Keep some margin below the change
-                        }}>
-                          <span style={{
-                            display: 'inline-block',
-                            padding: '0.5rem 1rem',
-                            borderRadius: '4px',
-                            backgroundColor: dailyChange.isPositive 
-                              ? (isDarkMode ? 'rgba(74, 222, 128, 0.1)' : 'rgba(34, 197, 94, 0.1)') 
-                              : (isDarkMode ? 'rgba(248, 113, 113, 0.1)' : 'rgba(239, 68, 68, 0.1)'),
-                            color: dailyChange.isPositive ? colors.successText : colors.dangerText,
-                            fontWeight: 500
-                          }}>
-                            {dailyChange.isPositive ? '↑' : '↓'} ${Math.abs(dailyChange.change).toFixed(2)} ({Math.abs(dailyChange.percentChange).toFixed(2)}%)
-                          </span>
-                        </div>
-                      );
-                    })()
-                  )}
-
-                  {/* Individual Data Points - Made clickable and added indicators */}
-                  <div style={{ 
+                {/* Latest Data Column (20%) */}
+                {selectedDateData && (
+                  <div style={{
+                    width: '20%', 
+                    flex: '0 0 20%', 
                     display: 'flex',
                     flexDirection: 'column',
                     gap: '0.5rem',
-                    overflowY: 'auto',
+                    padding: '0 0 0 1rem', // Add padding on the left to separate from chart
+                    height: '100%', // Maximize height
                   }}>
-                    {/* Open */}
-                    <div 
-                      onClick={() => toggleDatasetVisibility('Open Price')} // Add click handler
-                      style={{
-                      borderRadius: '4px',
-                      backgroundColor: datasetVisibility['Open Price'] ? colors.cardBackground : colors.border, // Indicator: change background/border
-                      border: `1px solid ${datasetVisibility['Open Price'] ? colors.border : colors.mutedText}`, // Indicator: change border color
-                      padding: '0.4rem 0.6rem',
-                      textAlign: 'center',
-                      flex: '0 0 auto',
-                      minWidth: 'auto',
-                      width: '100%',
-                      cursor: 'pointer', // Indicate clickable
-                      opacity: datasetVisibility['Open Price'] ? '1' : '0.7', // Indicator: change opacity
-                      transition: 'opacity 0.2s ease', // Smooth transition
-                    }}>
-                      <div style={{ fontSize: '0.75rem', color: colors.text, marginBottom: '0.1rem' }}>Open</div>
-                      <div style={{ fontSize: '1rem', fontWeight: 600, color: colors.text }}>${Number(selectedDateData.open).toFixed(2)}</div>
-                    </div>
-                    {/* Close */}
-                    <div 
-                      onClick={() => toggleDatasetVisibility('Close Price')} // Add click handler
-                      style={{
-                      borderRadius: '4px',
-                      backgroundColor: datasetVisibility['Close Price'] ? colors.cardBackground : colors.border, // Indicator
-                      border: `1px solid ${datasetVisibility['Close Price'] ? colors.border : colors.mutedText}`, // Indicator
-                      padding: '0.4rem 0.6rem',
-                      textAlign: 'center',
-                      flex: '0 0 auto',
-                      minWidth: 'auto',
-                      width: '100%',
-                      cursor: 'pointer', // Indicate clickable
-                      opacity: datasetVisibility['Close Price'] ? '1' : '0.7', // Indicator
-                      transition: 'opacity 0.2s ease', // Smooth transition
-                    }}>
-                      <div style={{ fontSize: '0.75rem', color: colors.text, marginBottom: '0.1rem' }}>Close</div>
-                      <div style={{ fontSize: '1rem', fontWeight: 600, color: colors.text }}>${Number(selectedDateData.close).toFixed(2)}</div>
-                    </div>
-                    {/* High */}
-                    <div 
-                      onClick={() => toggleDatasetVisibility('High')} // Add click handler
-                      style={{
-                      borderRadius: '4px',
-                      backgroundColor: datasetVisibility['High'] ? colors.cardBackground : colors.border, // Indicator
-                      border: `1px solid ${datasetVisibility['High'] ? colors.border : colors.mutedText}`, // Indicator
-                      padding: '0.4rem 0.6rem',
-                      textAlign: 'center',
-                      flex: '0 0 auto',
-                      minWidth: 'auto',
-                      width: '100%',
-                      cursor: 'pointer', // Indicate clickable
-                      opacity: datasetVisibility['High'] ? '1' : '0.7', // Indicator
-                      transition: 'opacity 0.2s ease', // Smooth transition
-                    }}>
-                      <div style={{ fontSize: '0.75rem', color: colors.text, marginBottom: '0.1rem' }}>High</div>
-                      <div style={{ fontSize: '1rem', fontWeight: 600, color: colors.text }}>${Number(selectedDateData.high).toFixed(2)}</div>
-                    </div>
-                    {/* Low */}
-                    <div 
-                      onClick={() => toggleDatasetVisibility('Low')} // Add click handler
-                      style={{
-                      borderRadius: '4px',
-                      backgroundColor: datasetVisibility['Low'] ? colors.cardBackground : colors.border, // Indicator
-                      border: `1px solid ${datasetVisibility['Low'] ? colors.border : colors.mutedText}`, // Indicator
-                      padding: '0.4rem 0.6rem',
-                      textAlign: 'center',
-                      flex: '0 0 auto',
-                      minWidth: 'auto',
-                      width: '100%',
-                      cursor: 'pointer', // Indicate clickable
-                      opacity: datasetVisibility['Low'] ? '1' : '0.7', // Indicator
-                      transition: 'opacity 0.2s ease', // Smooth transition
-                    }}>
-                      <div style={{ fontSize: '0.75rem', color: colors.text, marginBottom: '0.1rem' }}>Low</div>
-                      <div style={{ fontSize: '1rem', fontWeight: 600, color: colors.text }}>${Number(selectedDateData.low).toFixed(2)}</div>
-                    </div>
-                    {/* Volume - Not currently a line on the chart, keep as non-interactive */}
+                    {/* Latest Data Header */}
+                    <h3 style={{
+                      margin: '0 0 0.5rem 0',
+                      fontSize: '1rem',
+                      fontWeight: '600',
+                      color: colors.text
+                    }}>Latest Data ({selectedDateData.date})</h3>
+
+                    {/* Price Change Display - Now dynamic based on selected date */}
+                    {selectedDateData && marketData && marketData.data && (
+                      (() => {
+                        const dailyChange = calculateDailyChange(selectedDateData, marketData.data);
+                        if (!dailyChange) return null;
+                        return (
+                          <div 
+                            key={'daily-change-' + selectedDateData.date} // Unique key based on date to ensure re-render
+                            style={{
+                            textAlign: 'center',
+                            marginBottom: '1rem', // Keep some margin below the change
+                          }}>
+                            <span style={{
+                              display: 'inline-block',
+                              padding: '0.5rem 1rem',
+                              borderRadius: '4px',
+                              backgroundColor: dailyChange.isPositive 
+                                ? (isDarkMode ? 'rgba(74, 222, 128, 0.1)' : 'rgba(34, 197, 94, 0.1)') 
+                                : (isDarkMode ? 'rgba(248, 113, 113, 0.1)' : 'rgba(239, 68, 68, 0.1)'),
+                              color: dailyChange.isPositive ? colors.successText : colors.dangerText,
+                              fontWeight: 500
+                            }}>
+                              {dailyChange.isPositive ? '↑' : '↓'} ${Math.abs(dailyChange.change).toFixed(2)} ({Math.abs(dailyChange.percentChange).toFixed(2)}%)
+                            </span>
+                          </div>
+                        );
+                      })()
+                    )}
+
+                    {/* Individual Data Points - Made clickable and added indicators */}
                     <div style={{ 
-                      borderRadius: '4px',
-                      backgroundColor: colors.cardBackground,
-                      border: `1px solid ${colors.border}`, // Keep default border
-                      padding: '0.4rem 0.6rem',
-                      textAlign: 'center',
-                      flex: '0 0 auto',
-                      minWidth: 'auto',
-                      width: '100%',
-                      // Removed cursor: 'pointer' and opacity/transition for non-interactive item
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.5rem',
+                      overflowY: 'auto',
                     }}>
-                      <div style={{ fontSize: '0.75rem', color: colors.mutedText, marginBottom: '0.1rem' }}>Volume</div>
-                      <div style={{ fontSize: '1rem', fontWeight: 600, color: colors.text }}>{Number(selectedDateData.volume).toLocaleString()}</div>
+                      {/* Open */}
+                      <div 
+                        onClick={() => toggleDatasetVisibility('Open Price')} // Add click handler
+                        style={{
+                        borderRadius: '4px',
+                        backgroundColor: datasetVisibility['Open Price'] ? colors.cardBackground : colors.border, // Indicator: change background/border
+                        border: `1px solid ${datasetVisibility['Open Price'] ? colors.border : colors.mutedText}`, // Indicator: change border color
+                        padding: '0.4rem 0.6rem',
+                        textAlign: 'center',
+                        flex: '0 0 auto',
+                        minWidth: 'auto',
+                        width: '100%',
+                        cursor: 'pointer', // Indicate clickable
+                        opacity: datasetVisibility['Open Price'] ? '1' : '0.7', // Indicator: change opacity
+                        transition: 'opacity 0.2s ease', // Smooth transition
+                      }}>
+                        <div style={{ fontSize: '0.75rem', color: colors.text, marginBottom: '0.1rem' }}>Open</div>
+                        <div style={{ fontSize: '1rem', fontWeight: 600, color: colors.text }}>${Number(selectedDateData.open).toFixed(2)}</div>
+                      </div>
+                      {/* Close */}
+                      <div 
+                        onClick={() => toggleDatasetVisibility('Close Price')} // Add click handler
+                        style={{
+                        borderRadius: '4px',
+                        backgroundColor: datasetVisibility['Close Price'] ? colors.cardBackground : colors.border, // Indicator
+                        border: `1px solid ${datasetVisibility['Close Price'] ? colors.border : colors.mutedText}`, // Indicator
+                        padding: '0.4rem 0.6rem',
+                        textAlign: 'center',
+                        flex: '0 0 auto',
+                        minWidth: 'auto',
+                        width: '100%',
+                        cursor: 'pointer', // Indicate clickable
+                        opacity: datasetVisibility['Close Price'] ? '1' : '0.7', // Indicator
+                        transition: 'opacity 0.2s ease', // Smooth transition
+                      }}>
+                        <div style={{ fontSize: '0.75rem', color: colors.text, marginBottom: '0.1rem' }}>Close</div>
+                        <div style={{ fontSize: '1rem', fontWeight: 600, color: colors.text }}>${Number(selectedDateData.close).toFixed(2)}</div>
+                      </div>
+                      {/* High */}
+                      <div 
+                        onClick={() => toggleDatasetVisibility('High')} // Add click handler
+                        style={{
+                        borderRadius: '4px',
+                        backgroundColor: datasetVisibility['High'] ? colors.cardBackground : colors.border, // Indicator
+                        border: `1px solid ${datasetVisibility['High'] ? colors.border : colors.mutedText}`, // Indicator
+                        padding: '0.4rem 0.6rem',
+                        textAlign: 'center',
+                        flex: '0 0 auto',
+                        minWidth: 'auto',
+                        width: '100%',
+                        cursor: 'pointer', // Indicate clickable
+                        opacity: datasetVisibility['High'] ? '1' : '0.7', // Indicator
+                        transition: 'opacity 0.2s ease', // Smooth transition
+                      }}>
+                        <div style={{ fontSize: '0.75rem', color: colors.text, marginBottom: '0.1rem' }}>High</div>
+                        <div style={{ fontSize: '1rem', fontWeight: 600, color: colors.text }}>${Number(selectedDateData.high).toFixed(2)}</div>
+                      </div>
+                      {/* Low */}
+                      <div 
+                        onClick={() => toggleDatasetVisibility('Low')} // Add click handler
+                        style={{
+                        borderRadius: '4px',
+                        backgroundColor: datasetVisibility['Low'] ? colors.cardBackground : colors.border, // Indicator
+                        border: `1px solid ${datasetVisibility['Low'] ? colors.border : colors.mutedText}`, // Indicator
+                        padding: '0.4rem 0.6rem',
+                        textAlign: 'center',
+                        flex: '0 0 auto',
+                        minWidth: 'auto',
+                        width: '100%',
+                        cursor: 'pointer', // Indicate clickable
+                        opacity: datasetVisibility['Low'] ? '1' : '0.7', // Indicator
+                        transition: 'opacity 0.2s ease', // Smooth transition
+                      }}>
+                        <div style={{ fontSize: '0.75rem', color: colors.text, marginBottom: '0.1rem' }}>Low</div>
+                        <div style={{ fontSize: '1rem', fontWeight: 600, color: colors.text }}>${Number(selectedDateData.low).toFixed(2)}</div>
+                      </div>
+                      {/* Volume - Not currently a line on the chart, keep as non-interactive */}
+                      <div style={{ 
+                        borderRadius: '4px',
+                        backgroundColor: colors.cardBackground,
+                        border: `1px solid ${colors.border}`, // Keep default border
+                        padding: '0.4rem 0.6rem',
+                        textAlign: 'center',
+                        flex: '0 0 auto',
+                        minWidth: 'auto',
+                        width: '100%',
+                        // Removed cursor: 'pointer' and opacity/transition for non-interactive item
+                      }}>
+                        <div style={{ fontSize: '0.75rem', color: colors.mutedText, marginBottom: '0.1rem' }}>Volume</div>
+                        <div style={{ fontSize: '1rem', fontWeight: 600, color: colors.text }}>{Number(selectedDateData.volume).toLocaleString()}</div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
-            </div>
-          )}
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+        
+        {/* Right Column: Analyst Ratings */}
+        <div>
+          <AnalystRatings />
         </div>
       </div>
-      
-      {/* Live News Feed */}
-      <LiveFeed />
     </div>
   );
 };
