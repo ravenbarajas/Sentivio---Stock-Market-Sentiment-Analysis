@@ -217,7 +217,7 @@ a {
   display: flex;
   gap: 0.5rem;
   border-bottom: 1px solid var(--border);
-  margin-bottom: 1rem;
+  margin-bottom: 0rem;
 }
 
 .tabs-trigger {
@@ -246,7 +246,7 @@ a {
 }
 
 .tabs-content {
-  padding: 1rem 0;
+  padding: 0 0;
 }
 
 /* Utils */

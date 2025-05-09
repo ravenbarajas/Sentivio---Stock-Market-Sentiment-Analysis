@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
   Chart as ChartJS,
@@ -31,6 +31,22 @@ const StockChart = () => {
   const [error, setError] = useState(null);
   const { theme } = useTheme();
   
+  // New state for selected data point
+  const [selectedDateData, setSelectedDateData] = useState(null);
+  
+  // Popular stocks for quick selection
+  const popularStocks = [
+    { symbol: 'AAPL', name: 'Apple' },
+    { symbol: 'MSFT', name: 'Microsoft' },
+    { symbol: 'GOOGL', name: 'Google' },
+    { symbol: 'AMZN', name: 'Amazon' },
+    { symbol: 'TSLA', name: 'Tesla' },
+  ];
+
+  const [popularStockDetails, setPopularStockDetails] = useState([]);
+  const [popularStocksLoading, setPopularStocksLoading] = useState(false);
+  const [popularStocksError, setPopularStocksError] = useState(null);
+  
   // Determine if using dark mode
   const isDarkMode = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
   
@@ -39,8 +55,8 @@ const StockChart = () => {
     text: isDarkMode ? '#e4e4e7' : '#212529',
     mutedText: isDarkMode ? '#a1a1aa' : '#6c757d',
     background: isDarkMode ? '#18181b' : '#fff',
-    cardBackground: isDarkMode ? '#27272a' : '#fff',
-    cardHeaderBackground: isDarkMode ? '#3f3f46' : '#f8f9fa',
+    cardBackground: isDarkMode ? '#1a1a1a' : '#fff',
+    cardHeaderBackground: isDarkMode ? '#1a1a1a' : '#f8f9fa',
     border: isDarkMode ? '#3f3f46' : '#e9ecef',
     primary: '#007bff',
     primaryDark: '#0056b3',
@@ -52,6 +68,65 @@ const StockChart = () => {
     chartHigh: '#ffc107',
     chartLow: '#dc3545',
   };
+
+  useEffect(() => {
+    const fetchPopularStockDetails = async () => {
+      setPopularStocksLoading(true);
+      setPopularStocksError(null);
+      const detailsPromises = popularStocks.map(async (stock) => {
+        try {
+          const response = await axios.get(`/api/stock-data/${stock.symbol.toUpperCase()}`);
+          if (response.data && response.data.data && response.data.data.length > 0) {
+            const stockData = response.data.data;
+            const latestEntry = stockData[stockData.length - 1];
+            const currentPrice = parseFloat(latestEntry.close);
+            let change = null;
+            let percentChange = null;
+            let isPositive = null;
+
+            if (stockData.length > 1) {
+              const previousEntry = stockData[stockData.length - 2];
+              const previousClose = parseFloat(previousEntry.close);
+              if (previousClose !== 0) {
+                change = currentPrice - previousClose;
+                percentChange = (change / previousClose) * 100;
+              }
+            } else if (stockData.length === 1) {
+              const openPrice = parseFloat(latestEntry.open);
+              if (latestEntry.open !== undefined && openPrice !== 0) {
+                change = currentPrice - openPrice;
+                percentChange = (change / openPrice) * 100;
+              }
+            }
+            
+            if (change !== null) {
+              isPositive = change >= 0;
+            }
+
+            return {
+              ...stock,
+              currentPrice,
+              change,
+              percentChange,
+              isPositive,
+              error: false,
+            };
+          } else {
+            return { ...stock, currentPrice: null, change: null, percentChange: null, error: 'No data returned' };
+          }
+        } catch (err) {
+          console.error(`Failed to fetch data for ${stock.symbol}`, err);
+          return { ...stock, currentPrice: null, change: null, percentChange: null, error: true };
+        }
+      });
+      
+      const results = await Promise.all(detailsPromises);
+      setPopularStockDetails(results);
+      setPopularStocksLoading(false);
+    };
+
+    fetchPopularStockDetails();
+  }, []); // `popularStocks` is stable, so run once on mount.
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -66,10 +141,17 @@ const StockChart = () => {
     try {
       const response = await axios.get(`/api/stock-data/${symbol.toUpperCase()}`);
       setMarketData(response.data);
+      // Initialize selected data to the latest data point
+      if (response.data && response.data.data && response.data.data.length > 0) {
+        setSelectedDateData(response.data.data[response.data.data.length - 1]);
+      } else {
+        setSelectedDateData(null);
+      }
     } catch (err) {
       console.error('Error fetching stock data:', err);
       setError(err.response?.data?.error || 'Failed to fetch stock data');
       setMarketData(null);
+      setSelectedDateData(null);
     } finally {
       setLoading(false);
     }
@@ -173,17 +255,19 @@ const StockChart = () => {
           color: colors.border
         }
       }
+    },
+    onClick: (event, elements) => {
+      if (elements.length > 0) {
+        const dataIndex = elements[0].index;
+        const datasetIndex = elements[0].datasetIndex;
+        // We are interested in the data from the 'Close Price' dataset (datasetIndex 0)
+        if (datasetIndex === 0 && marketData && marketData.data) {
+          const clickedData = marketData.data[dataIndex];
+          setSelectedDateData(clickedData);
+        }
+      }
     }
   };
-
-  // Popular stocks for quick selection
-  const popularStocks = [
-    { symbol: 'AAPL', name: 'Apple' },
-    { symbol: 'MSFT', name: 'Microsoft' },
-    { symbol: 'GOOGL', name: 'Google' },
-    { symbol: 'AMZN', name: 'Amazon' },
-    { symbol: 'TSLA', name: 'Tesla' },
-  ];
 
   const handleQuickSelect = (stockSymbol) => {
     setSymbol(stockSymbol);
@@ -200,69 +284,186 @@ const StockChart = () => {
     try {
       const response = await axios.get(`/api/stock-data/${stockSymbol.toUpperCase()}`);
       setMarketData(response.data);
+      // Initialize selected data to the latest data point
+      if (response.data && response.data.data && response.data.data.length > 0) {
+        setSelectedDateData(response.data.data[response.data.data.length - 1]);
+      } else {
+        setSelectedDateData(null);
+      }
     } catch (err) {
       console.error('Error fetching stock data:', err);
       setError(err.response?.data?.error || 'Failed to fetch stock data');
       setMarketData(null);
+      setSelectedDateData(null);
     } finally {
       setLoading(false);
     }
   };
 
-  const calculatePriceChange = () => {
-    if (!marketData || !marketData.data || marketData.data.length < 2) return null;
-    
-    const latestPrice = parseFloat(marketData.data[marketData.data.length - 1].close);
-    const firstPrice = parseFloat(marketData.data[0].close);
-    
-    const change = latestPrice - firstPrice;
-    const percentChange = (change / firstPrice) * 100;
-    
+  // Helper function to calculate price change for a specific date relative to the previous day
+  const calculateDailyChange = (selectedData, allData) => {
+    if (!selectedData || !allData || allData.length < 2) return null; // Need at least 2 data points to calculate a change
+
+    const selectedIndex = allData.findIndex(item => item.date === selectedData.date);
+
+    if (selectedIndex <= 0) return null; // Cannot calculate change if it's the first day or data not found
+
+    const previousDayData = allData[selectedIndex - 1];
+    const currentPrice = parseFloat(selectedData.close);
+    const previousClose = parseFloat(previousDayData.close);
+
+    if (previousClose === 0) return null; // Avoid division by zero
+
+    const change = currentPrice - previousClose;
+    const percentChange = (change / previousClose) * 100;
+    const isPositive = change >= 0;
+
     return {
       change,
       percentChange,
-      isPositive: change >= 0
+      isPositive,
     };
   };
 
-  const priceChange = calculatePriceChange();
-
   return (
-    <div style={{ 
+    <div style={{
       padding: '20px',
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
       color: colors.text,
       backgroundColor: 'transparent'
     }}>
-      <div style={{ 
+      {/* Popular Stocks Card */}
+      <div style={{
         borderRadius: '8px',
         boxShadow: isDarkMode ? '0 1px 3px rgba(0,0,0,0.3)' : '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
         overflow: 'hidden',
-        marginBottom: '2rem',
+        marginBottom: '1rem',
         backgroundColor: colors.background
       }}>
-        <div style={{ 
-          padding: '1.5rem',
+        <div style={{
+          padding: '1rem',
           borderBottom: `1px solid ${colors.border}`,
           backgroundColor: colors.cardHeaderBackground
         }}>
-          <h2 style={{ 
-            margin: '0 0 0.5rem 0',
+          <h3 style={{
+            margin: '0 0 0 0',
+            fontSize: '1.5rem',
+            fontWeight: '600',
+            color: colors.text
+          }}>Popular Stocks</h3>
+          <p style={{
+            margin: '0',
+            fontSize: '0.875rem',
+            color: colors.mutedText
+          }}>Quick select or view summary data</p>
+        </div>
+        <div style={{ padding: '1rem', backgroundColor: colors.cardBackground }}>
+          {popularStocksLoading && <p style={{color: colors.mutedText}}>Loading popular stock summaries...</p>}
+          {popularStocksError && <p style={{color: colors.dangerText}}>{popularStocksError}</p>}
+          {!popularStocksLoading && !popularStocksError && (
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
+              gap: '1rem'
+            }}>
+              {popularStockDetails.map(detail => (
+                <button
+                  key={detail.symbol}
+                  onClick={() => handleQuickSelect(detail.symbol)}
+                  disabled={loading} // Disable if main chart is loading
+                  style={{
+                    padding: '1rem',
+                    border: `1px solid ${colors.border}`,
+                    borderRadius: '8px',
+                    backgroundColor: colors.cardBackground,
+                    textAlign: 'left',
+                    cursor: loading ? 'not-allowed' : 'pointer',
+                    opacity: loading ? '0.65' : '1',
+                    boxShadow: isDarkMode ? '0 2px 4px rgba(0,0,0,0.25)' : '0 2px 4px rgba(0,0,0,0.1)',
+                    transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    minHeight: '100px', // Ensure cards have a consistent minimum height
+                  }}
+                  onMouseOver={(e) => {
+                    if (!loading) {
+                      e.currentTarget.style.transform = 'translateY(-3px)';
+                      e.currentTarget.style.boxShadow = isDarkMode ? '0 5px 10px rgba(0,0,0,0.35)' : '0 5px 10px rgba(0,0,0,0.15)';
+                    }
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.transform = 'none';
+                    e.currentTarget.style.boxShadow = isDarkMode ? '0 2px 4px rgba(0,0,0,0.25)' : '0 2px 4px rgba(0,0,0,0.1)';
+                  }}
+                >
+                  <div>
+                    <div style={{ fontSize: '0.8rem', color: colors.mutedText, marginBottom: '0.25rem' }}>{detail.symbol}</div>
+                    <div style={{ fontSize: '1rem', fontWeight: '600', color: colors.text, marginBottom: '0.35rem',  whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {detail.name}
+                    </div>
+                  </div>
+                  {detail.error === true && <div style={{ fontSize: '0.8rem', color: colors.dangerText, marginTop: 'auto' }}>Error loading data</div>}
+                  {typeof detail.error === 'string' && <div style={{ fontSize: '0.8rem', color: colors.mutedText, marginTop: 'auto' }}>{detail.error}</div>}
+
+                  {!detail.error && detail.currentPrice !== null && (
+                    <div style={{marginTop: 'auto'}}>
+                      <div style={{ fontSize: '1.1rem', fontWeight: 'bold', color: colors.text, marginBottom: '0.25rem' }}>
+                        ${detail.currentPrice.toFixed(2)}
+                      </div>
+                      {detail.change !== null && detail.percentChange !== null && detail.isPositive !== null ? (
+                        <div style={{ fontSize: '0.8rem', fontWeight: 500, color: detail.isPositive ? colors.successText : colors.dangerText }}>
+                          {detail.isPositive ? '▲' : '▼'} {Math.abs(detail.change).toFixed(2)} ({Math.abs(detail.percentChange).toFixed(2)}%)
+                        </div>
+                      ) : (
+                        <div style={{ fontSize: '0.8rem', color: colors.mutedText }}>N/A</div>
+                      )}
+                    </div>
+                  )}
+                   {!detail.error && detail.currentPrice === null && <div style={{ fontSize: '0.8rem', color: colors.mutedText, marginTop: 'auto' }}>Data unavailable</div>}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Main Stock Data Card */}
+      <div style={{
+        borderRadius: '8px',
+        boxShadow: isDarkMode ? '0 1px 3px rgba(0,0,0,0.3)' : '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
+        overflow: 'hidden',
+        marginBottom: '1rem',
+        backgroundColor: colors.background
+      }}>
+        <div style={{
+          padding: '1rem',
+          borderBottom: `1px solid ${colors.border}`,
+          backgroundColor: colors.cardHeaderBackground
+        }}>
+          <h2 style={{
+            margin: '0 0 0 0',
             fontSize: '1.5rem',
             fontWeight: '600',
             color: colors.text
           }}>Stock Market Data</h2>
-          <p style={{ 
+          <p style={{
             margin: '0',
             fontSize: '0.875rem',
             color: colors.mutedText
-          }}>Enter a stock symbol to view historical market data</p>
+          }}>Enter a symbol to view historical market data</p>
         </div>
-        <div style={{ padding: '1.5rem', backgroundColor: colors.cardBackground }}>
-          <form onSubmit={handleSubmit} style={{ 
+        {/* Main Card Body */}
+        <div style={{
+          padding: '1rem',
+          backgroundColor: colors.cardBackground,
+          // Removed flex and gap from here, children will stack naturally
+        }}>
+          {/* Search form */}
+          <form onSubmit={handleSubmit} style={{
             display: 'flex',
             gap: '0.5rem',
-            marginBottom: '1rem' 
+            marginBottom: '1rem'
           }}>
             <input
               type="text"
@@ -298,40 +499,7 @@ const StockChart = () => {
             </button>
           </form>
 
-          <div style={{ marginBottom: '1rem' }}>
-            <h4 style={{ 
-              margin: '0 0 0.5rem 0',
-              fontSize: '1rem',
-              fontWeight: '600',
-              color: colors.text
-            }}>Popular Stocks:</h4>
-            <div style={{ 
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: '0.5rem'
-            }}>
-              {popularStocks.map(stock => (
-                <button 
-                  key={stock.symbol}
-                  onClick={() => handleQuickSelect(stock.symbol)}
-                  style={{ 
-                    padding: '0.375rem 0.75rem',
-                    border: `1px solid ${colors.primary}`,
-                    borderRadius: '4px',
-                    backgroundColor: 'transparent',
-                    color: colors.primary,
-                    cursor: loading ? 'not-allowed' : 'pointer',
-                    opacity: loading ? '0.65' : '1',
-                    fontSize: '0.875rem'
-                  }}
-                  disabled={loading}
-                >
-                  {stock.name}
-                </button>
-              ))}
-            </div>
-          </div>
-
+          {/* Error message display */}
           {error && (
             <div style={{ 
               backgroundColor: isDarkMode ? 'rgba(248, 113, 113, 0.1)' : 'rgba(239, 68, 68, 0.1)', 
@@ -344,104 +512,153 @@ const StockChart = () => {
             </div>
           )}
 
+          {/* Container for Chart and Latest Data (Flex Row) */}
           {marketData && marketData.data && marketData.data.length > 0 && (
-            <div style={{ width: '100%' }}>
-              <Line data={chartData} options={chartOptions} />
-              
-              <div style={{ 
-                marginTop: '1.5rem',
-                padding: '1.5rem',
-                borderRadius: '8px',
-                border: `1px solid ${colors.border}`,
-                backgroundColor: colors.cardHeaderBackground
+            <div style={{
+              display: 'flex', // Arrange children (chart and data) in a row
+              width: '100%' // Ensure this container takes full width of parent
+            }}>
+              {/* Chart Container (80%) */}
+              <div style={{
+                width: '80%', 
+                flex: '0 0 80%', 
               }}>
-                <h3 style={{ 
-                  margin: '0 0 1rem 0',
-                  fontSize: '1.25rem',
-                  fontWeight: '600',
-                  color: colors.text
-                }}>Latest Data ({marketData.data[marketData.data.length - 1].date})</h3>
-                
-                {priceChange && (
-                  <div style={{ 
-                    textAlign: 'center',
-                    marginBottom: '1rem'
-                  }}>
-                    <span style={{ 
-                      display: 'inline-block',
-                      padding: '0.5rem 1rem',
-                      borderRadius: '4px',
-                      backgroundColor: priceChange.isPositive 
-                        ? (isDarkMode ? 'rgba(74, 222, 128, 0.1)' : 'rgba(34, 197, 94, 0.1)') 
-                        : (isDarkMode ? 'rgba(248, 113, 113, 0.1)' : 'rgba(239, 68, 68, 0.1)'),
-                      color: priceChange.isPositive ? colors.successText : colors.dangerText,
-                      fontWeight: 500
-                    }}>
-                      {priceChange.isPositive ? '↑' : '↓'} ${Math.abs(priceChange.change).toFixed(2)} ({priceChange.percentChange.toFixed(2)}%)
-                    </span>
-                  </div>
-                )}
-                
-                <div style={{ 
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(2, 1fr)',
-                  gap: '1rem',
-                  '@media (min-width: 768px)': {
-                    gridTemplateColumns: 'repeat(5, 1fr)',
-                  }
+                <Line data={chartData} options={chartOptions} />
+              </div>
+
+              {/* Latest Data Column (20%) */}
+              {selectedDateData && (
+                <div style={{
+                  width: '20%', 
+                  flex: '0 0 20%', 
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.5rem',
+                  padding: '0 0 0 1rem', // Add padding on the left to separate from chart
+                  height: '100%', // Maximize height
                 }}>
+                  {/* Latest Data Header */}
+                  <h3 style={{
+                    margin: '0 0 0.5rem 0',
+                    fontSize: '1rem',
+                    fontWeight: '600',
+                    color: colors.text
+                  }}>Latest Data ({selectedDateData.date})</h3>
+
+                  {/* Price Change Display - Now dynamic based on selected date */}
+                  {/* Explicitly calculate daily change and use its result */}
+                  {selectedDateData && marketData && marketData.data && (
+                    (() => {
+                      const dailyChange = calculateDailyChange(selectedDateData, marketData.data);
+                      
+                      // Only render the price change span if dailyChange is successfully calculated
+                      if (!dailyChange) return null; 
+
+                      return (
+                        <div 
+                          key={'daily-change-' + selectedDateData.date} // Unique key based on date to ensure re-render
+                          style={{
+                          textAlign: 'center',
+                          marginBottom: '1rem', // Keep some margin below the change
+                          // Removed background and padding styles that were for the standalone card
+                        }}>
+                          <span style={{
+                            display: 'inline-block',
+                            padding: '0.5rem 1rem',
+                            borderRadius: '4px',
+                            backgroundColor: dailyChange.isPositive 
+                              ? (isDarkMode ? 'rgba(74, 222, 128, 0.1)' : 'rgba(34, 197, 94, 0.1)') 
+                              : (isDarkMode ? 'rgba(248, 113, 113, 0.1)' : 'rgba(239, 68, 68, 0.1)'),
+                            color: dailyChange.isPositive ? colors.successText : colors.dangerText,
+                            fontWeight: 500
+                          }}>
+                            {dailyChange.isPositive ? '↑' : '↓'} ${Math.abs(dailyChange.change).toFixed(2)} ({dailyChange.percentChange.toFixed(2)}%)
+                          </span>
+                        </div>
+                      );
+                    })()
+                  )}
+
+                  {/* Individual Data Points */}
                   <div style={{ 
-                    borderRadius: '4px',
-                    backgroundColor: colors.cardBackground,
-                    border: `1px solid ${colors.border}`,
-                    padding: '1rem',
-                    textAlign: 'center'
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.5rem',
+                    overflowY: 'auto',
                   }}>
-                    <div style={{ fontSize: '0.875rem', color: colors.mutedText, marginBottom: '0.25rem' }}>Open</div>
-                    <div style={{ fontSize: '1.25rem', fontWeight: 600, color: colors.text }}>${Number(marketData.data[marketData.data.length - 1].open).toFixed(2)}</div>
-                  </div>
-                  <div style={{ 
-                    borderRadius: '4px',
-                    backgroundColor: colors.cardBackground,
-                    border: `1px solid ${colors.border}`,
-                    padding: '1rem',
-                    textAlign: 'center'
-                  }}>
-                    <div style={{ fontSize: '0.875rem', color: colors.mutedText, marginBottom: '0.25rem' }}>Close</div>
-                    <div style={{ fontSize: '1.25rem', fontWeight: 600, color: colors.text }}>${Number(marketData.data[marketData.data.length - 1].close).toFixed(2)}</div>
-                  </div>
-                  <div style={{ 
-                    borderRadius: '4px',
-                    backgroundColor: colors.cardBackground,
-                    border: `1px solid ${colors.border}`,
-                    padding: '1rem',
-                    textAlign: 'center'
-                  }}>
-                    <div style={{ fontSize: '0.875rem', color: colors.mutedText, marginBottom: '0.25rem' }}>High</div>
-                    <div style={{ fontSize: '1.25rem', fontWeight: 600, color: colors.text }}>${Number(marketData.data[marketData.data.length - 1].high).toFixed(2)}</div>
-                  </div>
-                  <div style={{ 
-                    borderRadius: '4px',
-                    backgroundColor: colors.cardBackground,
-                    border: `1px solid ${colors.border}`,
-                    padding: '1rem',
-                    textAlign: 'center'
-                  }}>
-                    <div style={{ fontSize: '0.875rem', color: colors.mutedText, marginBottom: '0.25rem' }}>Low</div>
-                    <div style={{ fontSize: '1.25rem', fontWeight: 600, color: colors.text }}>${Number(marketData.data[marketData.data.length - 1].low).toFixed(2)}</div>
-                  </div>
-                  <div style={{ 
-                    borderRadius: '4px',
-                    backgroundColor: colors.cardBackground,
-                    border: `1px solid ${colors.border}`,
-                    padding: '1rem',
-                    textAlign: 'center'
-                  }}>
-                    <div style={{ fontSize: '0.875rem', color: colors.mutedText, marginBottom: '0.25rem' }}>Volume</div>
-                    <div style={{ fontSize: '1.25rem', fontWeight: 600, color: colors.text }}>{Number(marketData.data[marketData.data.length - 1].volume).toLocaleString()}</div>
+                    {/* Open */}
+                    <div style={{ 
+                      borderRadius: '4px',
+                      backgroundColor: colors.cardBackground,
+                      border: `1px solid ${colors.border}`,
+                      padding: '0.4rem 0.6rem',
+                      textAlign: 'center',
+                      flex: '0 0 auto',
+                      minWidth: 'auto',
+                      width: '100%'
+                    }}>
+                      <div style={{ fontSize: '0.75rem', color: colors.mutedText, marginBottom: '0.1rem' }}>Open</div>
+                      <div style={{ fontSize: '1rem', fontWeight: 600, color: colors.text }}>${Number(selectedDateData.open).toFixed(2)}</div>
+                    </div>
+                    {/* Close */}
+                    <div style={{ 
+                      borderRadius: '4px',
+                      backgroundColor: colors.cardBackground,
+                      border: `1px solid ${colors.border}`,
+                      padding: '0.4rem 0.6rem',
+                      textAlign: 'center',
+                      flex: '0 0 auto',
+                      minWidth: 'auto',
+                      width: '100%'
+                    }}>
+                      <div style={{ fontSize: '0.75rem', color: colors.mutedText, marginBottom: '0.1rem' }}>Close</div>
+                      <div style={{ fontSize: '1rem', fontWeight: 600, color: colors.text }}>${Number(selectedDateData.close).toFixed(2)}</div>
+                    </div>
+                    {/* High */}
+                    <div style={{ 
+                      borderRadius: '4px',
+                      backgroundColor: colors.cardBackground,
+                      border: `1px solid ${colors.border}`,
+                      padding: '0.4rem 0.6rem',
+                      textAlign: 'center',
+                      flex: '0 0 auto',
+                      minWidth: 'auto',
+                      width: '100%'
+                    }}>
+                      <div style={{ fontSize: '0.75rem', color: colors.mutedText, marginBottom: '0.1rem' }}>High</div>
+                      <div style={{ fontSize: '1rem', fontWeight: 600, color: colors.text }}>${Number(selectedDateData.high).toFixed(2)}</div>
+                    </div>
+                    {/* Low */}
+                    <div style={{ 
+                      borderRadius: '4px',
+                      backgroundColor: colors.cardBackground,
+                      border: `1px solid ${colors.border}`,
+                      padding: '0.4rem 0.6rem',
+                      textAlign: 'center',
+                      flex: '0 0 auto',
+                      minWidth: 'auto',
+                      width: '100%'
+                    }}>
+                      <div style={{ fontSize: '0.75rem', color: colors.mutedText, marginBottom: '0.1rem' }}>Low</div>
+                      <div style={{ fontSize: '1rem', fontWeight: 600, color: colors.text }}>${Number(selectedDateData.low).toFixed(2)}</div>
+                    </div>
+                    {/* Volume */}
+                    <div style={{ 
+                      borderRadius: '4px',
+                      backgroundColor: colors.cardBackground,
+                      border: `1px solid ${colors.border}`,
+                      padding: '0.4rem 0.6rem',
+                      textAlign: 'center',
+                      flex: '0 0 auto',
+                      minWidth: 'auto',
+                      width: '100%'
+                    }}>
+                      <div style={{ fontSize: '0.75rem', color: colors.mutedText, marginBottom: '0.1rem' }}>Volume</div>
+                      <div style={{ fontSize: '1rem', fontWeight: 600, color: colors.text }}>{Number(selectedDateData.volume).toLocaleString()}</div>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
           )}
         </div>
