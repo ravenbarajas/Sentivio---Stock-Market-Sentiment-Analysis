@@ -34,6 +34,15 @@ const StockChart = () => {
   // New state for selected data point
   const [selectedDateData, setSelectedDateData] = useState(null);
   
+  // New state to manage dataset visibility
+  const [datasetVisibility, setDatasetVisibility] = useState({
+    'Close Price': true,
+    'Open Price': true,
+    'High': false, // Initially hidden
+    'Low': false,  // Initially hidden
+    // Volume is not a line dataset in this chart, so not included here for toggling
+  });
+  
   // Popular stocks for quick selection
   const popularStocks = [
     { symbol: 'AAPL', name: 'Apple' },
@@ -168,6 +177,7 @@ const StockChart = () => {
         borderWidth: 0.5,
         tension: 0.1,
         pointRadius: 0,
+        hidden: !datasetVisibility['Close Price'], // Link visibility to state
       },
       {
         label: 'Open Price',
@@ -177,6 +187,7 @@ const StockChart = () => {
         borderWidth: 0.5,
         tension: 0.1,
         pointRadius: 0,
+        hidden: !datasetVisibility['Open Price'], // Link visibility to state
       },
       {
         label: 'High',
@@ -185,7 +196,7 @@ const StockChart = () => {
         backgroundColor: 'rgba(255, 193, 7, 0.1)',
         borderWidth: 0.5,
         tension: 0.1,
-        hidden: true,
+        hidden: !datasetVisibility['High'], // Link visibility to state
         pointRadius: 0,
       },
       {
@@ -195,9 +206,10 @@ const StockChart = () => {
         backgroundColor: 'rgba(220, 53, 69, 0.1)',
         borderWidth: 0.5,
         tension: 0.1,
-        hidden: true,
+        hidden: !datasetVisibility['Low'], // Link visibility to state
         pointRadius: 0,
       }
+      // Volume is not a line dataset in this chart
     ],
   } : null;
 
@@ -208,7 +220,9 @@ const StockChart = () => {
         position: 'top',
         labels: {
           color: colors.text
-        }
+        },
+        // Disable default legend click behavior
+        onClick: (e) => e.stopPropagation() // Stop the event from triggering default Chart.js toggle
       },
       title: {
         display: true,
@@ -260,13 +274,45 @@ const StockChart = () => {
       if (elements.length > 0) {
         const dataIndex = elements[0].index;
         const datasetIndex = elements[0].datasetIndex;
-        // We are interested in the data from the 'Close Price' dataset (datasetIndex 0)
-        if (datasetIndex === 0 && marketData && marketData.data) {
-          const clickedData = marketData.data[dataIndex];
-          setSelectedDateData(clickedData);
+        // We are interested in the data from the 'Close Price' dataset (datasetIndex 0) for selecting the date
+        if (marketData && marketData.data && dataIndex >= 0 && dataIndex < marketData.data.length) {
+           setSelectedDateData(marketData.data[dataIndex]);
         }
       }
     }
+  };
+
+  // Helper function to calculate price change for a specific date relative to the previous day
+  const calculateDailyChange = (selectedData, allData) => {
+    if (!selectedData || !allData || allData.length < 2) return null; // Need at least 2 data points to calculate a change
+
+    const selectedIndex = allData.findIndex(item => item.date === selectedData.date);
+
+    if (selectedIndex <= 0) return null; // Cannot calculate change if it's the first day or data not found
+
+    const previousDayData = allData[selectedIndex - 1];
+    const currentPrice = parseFloat(selectedData.close);
+    const previousClose = parseFloat(previousDayData.close);
+
+    if (previousClose === 0) return null; // Avoid division by zero
+
+    const change = currentPrice - previousClose;
+    const percentChange = (change / previousClose) * 100;
+    const isPositive = change >= 0;
+
+    return {
+      change,
+      percentChange,
+      isPositive,
+    };
+  };
+
+  // Function to toggle dataset visibility by label
+  const toggleDatasetVisibility = (datasetLabel) => {
+    setDatasetVisibility(prevState => ({
+      ...prevState,
+      [datasetLabel]: !prevState[datasetLabel]
+    }));
   };
 
   const handleQuickSelect = (stockSymbol) => {
@@ -298,31 +344,6 @@ const StockChart = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  // Helper function to calculate price change for a specific date relative to the previous day
-  const calculateDailyChange = (selectedData, allData) => {
-    if (!selectedData || !allData || allData.length < 2) return null; // Need at least 2 data points to calculate a change
-
-    const selectedIndex = allData.findIndex(item => item.date === selectedData.date);
-
-    if (selectedIndex <= 0) return null; // Cannot calculate change if it's the first day or data not found
-
-    const previousDayData = allData[selectedIndex - 1];
-    const currentPrice = parseFloat(selectedData.close);
-    const previousClose = parseFloat(previousDayData.close);
-
-    if (previousClose === 0) return null; // Avoid division by zero
-
-    const change = currentPrice - previousClose;
-    const percentChange = (change / previousClose) * 100;
-    const isPositive = change >= 0;
-
-    return {
-      change,
-      percentChange,
-      isPositive,
-    };
   };
 
   return (
@@ -546,21 +567,16 @@ const StockChart = () => {
                   }}>Latest Data ({selectedDateData.date})</h3>
 
                   {/* Price Change Display - Now dynamic based on selected date */}
-                  {/* Explicitly calculate daily change and use its result */}
                   {selectedDateData && marketData && marketData.data && (
                     (() => {
                       const dailyChange = calculateDailyChange(selectedDateData, marketData.data);
-                      
-                      // Only render the price change span if dailyChange is successfully calculated
-                      if (!dailyChange) return null; 
-
+                      if (!dailyChange) return null;
                       return (
                         <div 
                           key={'daily-change-' + selectedDateData.date} // Unique key based on date to ensure re-render
                           style={{
                           textAlign: 'center',
                           marginBottom: '1rem', // Keep some margin below the change
-                          // Removed background and padding styles that were for the standalone card
                         }}>
                           <span style={{
                             display: 'inline-block',
@@ -572,14 +588,14 @@ const StockChart = () => {
                             color: dailyChange.isPositive ? colors.successText : colors.dangerText,
                             fontWeight: 500
                           }}>
-                            {dailyChange.isPositive ? '↑' : '↓'} ${Math.abs(dailyChange.change).toFixed(2)} ({dailyChange.percentChange.toFixed(2)}%)
+                            {dailyChange.isPositive ? '↑' : '↓'} ${Math.abs(dailyChange.change).toFixed(2)} ({Math.abs(dailyChange.percentChange).toFixed(2)}%)
                           </span>
                         </div>
                       );
                     })()
                   )}
 
-                  {/* Individual Data Points */}
+                  {/* Individual Data Points - Made clickable and added indicators */}
                   <div style={{ 
                     display: 'flex',
                     flexDirection: 'column',
@@ -587,71 +603,92 @@ const StockChart = () => {
                     overflowY: 'auto',
                   }}>
                     {/* Open */}
-                    <div style={{ 
+                    <div 
+                      onClick={() => toggleDatasetVisibility('Open Price')} // Add click handler
+                      style={{
                       borderRadius: '4px',
-                      backgroundColor: colors.cardBackground,
-                      border: `1px solid ${colors.border}`,
+                      backgroundColor: datasetVisibility['Open Price'] ? colors.cardBackground : colors.border, // Indicator: change background/border
+                      border: `1px solid ${datasetVisibility['Open Price'] ? colors.border : colors.mutedText}`, // Indicator: change border color
                       padding: '0.4rem 0.6rem',
                       textAlign: 'center',
                       flex: '0 0 auto',
                       minWidth: 'auto',
-                      width: '100%'
+                      width: '100%',
+                      cursor: 'pointer', // Indicate clickable
+                      opacity: datasetVisibility['Open Price'] ? '1' : '0.7', // Indicator: change opacity
+                      transition: 'opacity 0.2s ease', // Smooth transition
                     }}>
-                      <div style={{ fontSize: '0.75rem', color: colors.mutedText, marginBottom: '0.1rem' }}>Open</div>
+                      <div style={{ fontSize: '0.75rem', color: colors.text, marginBottom: '0.1rem' }}>Open</div>
                       <div style={{ fontSize: '1rem', fontWeight: 600, color: colors.text }}>${Number(selectedDateData.open).toFixed(2)}</div>
                     </div>
                     {/* Close */}
-                    <div style={{ 
+                    <div 
+                      onClick={() => toggleDatasetVisibility('Close Price')} // Add click handler
+                      style={{
                       borderRadius: '4px',
-                      backgroundColor: colors.cardBackground,
-                      border: `1px solid ${colors.border}`,
+                      backgroundColor: datasetVisibility['Close Price'] ? colors.cardBackground : colors.border, // Indicator
+                      border: `1px solid ${datasetVisibility['Close Price'] ? colors.border : colors.mutedText}`, // Indicator
                       padding: '0.4rem 0.6rem',
                       textAlign: 'center',
                       flex: '0 0 auto',
                       minWidth: 'auto',
-                      width: '100%'
+                      width: '100%',
+                      cursor: 'pointer', // Indicate clickable
+                      opacity: datasetVisibility['Close Price'] ? '1' : '0.7', // Indicator
+                      transition: 'opacity 0.2s ease', // Smooth transition
                     }}>
-                      <div style={{ fontSize: '0.75rem', color: colors.mutedText, marginBottom: '0.1rem' }}>Close</div>
+                      <div style={{ fontSize: '0.75rem', color: colors.text, marginBottom: '0.1rem' }}>Close</div>
                       <div style={{ fontSize: '1rem', fontWeight: 600, color: colors.text }}>${Number(selectedDateData.close).toFixed(2)}</div>
                     </div>
                     {/* High */}
-                    <div style={{ 
+                    <div 
+                      onClick={() => toggleDatasetVisibility('High')} // Add click handler
+                      style={{
                       borderRadius: '4px',
-                      backgroundColor: colors.cardBackground,
-                      border: `1px solid ${colors.border}`,
+                      backgroundColor: datasetVisibility['High'] ? colors.cardBackground : colors.border, // Indicator
+                      border: `1px solid ${datasetVisibility['High'] ? colors.border : colors.mutedText}`, // Indicator
                       padding: '0.4rem 0.6rem',
                       textAlign: 'center',
                       flex: '0 0 auto',
                       minWidth: 'auto',
-                      width: '100%'
+                      width: '100%',
+                      cursor: 'pointer', // Indicate clickable
+                      opacity: datasetVisibility['High'] ? '1' : '0.7', // Indicator
+                      transition: 'opacity 0.2s ease', // Smooth transition
                     }}>
-                      <div style={{ fontSize: '0.75rem', color: colors.mutedText, marginBottom: '0.1rem' }}>High</div>
+                      <div style={{ fontSize: '0.75rem', color: colors.text, marginBottom: '0.1rem' }}>High</div>
                       <div style={{ fontSize: '1rem', fontWeight: 600, color: colors.text }}>${Number(selectedDateData.high).toFixed(2)}</div>
                     </div>
                     {/* Low */}
-                    <div style={{ 
+                    <div 
+                      onClick={() => toggleDatasetVisibility('Low')} // Add click handler
+                      style={{
                       borderRadius: '4px',
-                      backgroundColor: colors.cardBackground,
-                      border: `1px solid ${colors.border}`,
+                      backgroundColor: datasetVisibility['Low'] ? colors.cardBackground : colors.border, // Indicator
+                      border: `1px solid ${datasetVisibility['Low'] ? colors.border : colors.mutedText}`, // Indicator
                       padding: '0.4rem 0.6rem',
                       textAlign: 'center',
                       flex: '0 0 auto',
                       minWidth: 'auto',
-                      width: '100%'
+                      width: '100%',
+                      cursor: 'pointer', // Indicate clickable
+                      opacity: datasetVisibility['Low'] ? '1' : '0.7', // Indicator
+                      transition: 'opacity 0.2s ease', // Smooth transition
                     }}>
-                      <div style={{ fontSize: '0.75rem', color: colors.mutedText, marginBottom: '0.1rem' }}>Low</div>
+                      <div style={{ fontSize: '0.75rem', color: colors.text, marginBottom: '0.1rem' }}>Low</div>
                       <div style={{ fontSize: '1rem', fontWeight: 600, color: colors.text }}>${Number(selectedDateData.low).toFixed(2)}</div>
                     </div>
-                    {/* Volume */}
+                    {/* Volume - Not currently a line on the chart, keep as non-interactive */}
                     <div style={{ 
                       borderRadius: '4px',
                       backgroundColor: colors.cardBackground,
-                      border: `1px solid ${colors.border}`,
+                      border: `1px solid ${colors.border}`, // Keep default border
                       padding: '0.4rem 0.6rem',
                       textAlign: 'center',
                       flex: '0 0 auto',
                       minWidth: 'auto',
-                      width: '100%'
+                      width: '100%',
+                      // Removed cursor: 'pointer' and opacity/transition for non-interactive item
                     }}>
                       <div style={{ fontSize: '0.75rem', color: colors.mutedText, marginBottom: '0.1rem' }}>Volume</div>
                       <div style={{ fontSize: '1rem', fontWeight: 600, color: colors.text }}>{Number(selectedDateData.volume).toLocaleString()}</div>
@@ -667,4 +704,4 @@ const StockChart = () => {
   );
 };
 
-export default StockChart; 
+export default StockChart;
