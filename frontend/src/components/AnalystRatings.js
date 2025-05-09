@@ -145,7 +145,16 @@ const AnalystRatings = () => {
                       </span>
                     )}
                   </div>
-                  <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.9rem' }}>
+                  <p style={{ 
+                    margin: '0.5rem 0 0 0', 
+                    fontSize: '0.9rem',
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    lineHeight: '1.4'
+                  }}>
                     {rating.headline}
                   </p>
                   {rating.url && (

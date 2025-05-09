@@ -554,26 +554,25 @@ const StockChart = () => {
             {marketData && marketData.data && marketData.data.length > 0 && (
               <div style={{
                 display: 'flex', // Arrange children (chart and data) in a row
+                flexDirection: 'column', // Change from row to column layout
                 width: '100%' // Ensure this container takes full width of parent
               }}>
-                {/* Chart Container (80%) */}
+                {/* Chart Container (now full width) */}
                 <div style={{
-                  width: '80%', 
-                  flex: '0 0 80%', 
+                  width: '100%', // Changed from 80% to 100%
                 }}>
                   <Line data={chartData} options={chartOptions} />
                 </div>
 
-                {/* Latest Data Column (20%) */}
+                {/* Latest Data Column (now below the chart) */}
                 {selectedDateData && (
                   <div style={{
-                    width: '20%', 
-                    flex: '0 0 20%', 
+                    width: '100%', // Changed from 20% to 100%
+                    marginTop: '1rem', // Add top margin for spacing
                     display: 'flex',
                     flexDirection: 'column',
                     gap: '0.5rem',
-                    padding: '0 0 0 1rem', // Add padding on the left to separate from chart
-                    height: '100%', // Maximize height
+                    padding: '0', // Removed left padding
                   }}>
                     {/* Latest Data Header */}
                     <h3 style={{
@@ -614,10 +613,9 @@ const StockChart = () => {
 
                     {/* Individual Data Points - Made clickable and added indicators */}
                     <div style={{ 
-                      display: 'flex',
-                      flexDirection: 'column',
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(5, 1fr)', // Display in a row with 5 equal columns
                       gap: '0.5rem',
-                      overflowY: 'auto',
                     }}>
                       {/* Open */}
                       <div 
@@ -628,9 +626,6 @@ const StockChart = () => {
                         border: `1px solid ${datasetVisibility['Open Price'] ? colors.border : colors.mutedText}`, // Indicator: change border color
                         padding: '0.4rem 0.6rem',
                         textAlign: 'center',
-                        flex: '0 0 auto',
-                        minWidth: 'auto',
-                        width: '100%',
                         cursor: 'pointer', // Indicate clickable
                         opacity: datasetVisibility['Open Price'] ? '1' : '0.7', // Indicator: change opacity
                         transition: 'opacity 0.2s ease', // Smooth transition
@@ -647,9 +642,6 @@ const StockChart = () => {
                         border: `1px solid ${datasetVisibility['Close Price'] ? colors.border : colors.mutedText}`, // Indicator
                         padding: '0.4rem 0.6rem',
                         textAlign: 'center',
-                        flex: '0 0 auto',
-                        minWidth: 'auto',
-                        width: '100%',
                         cursor: 'pointer', // Indicate clickable
                         opacity: datasetVisibility['Close Price'] ? '1' : '0.7', // Indicator
                         transition: 'opacity 0.2s ease', // Smooth transition
@@ -666,9 +658,6 @@ const StockChart = () => {
                         border: `1px solid ${datasetVisibility['High'] ? colors.border : colors.mutedText}`, // Indicator
                         padding: '0.4rem 0.6rem',
                         textAlign: 'center',
-                        flex: '0 0 auto',
-                        minWidth: 'auto',
-                        width: '100%',
                         cursor: 'pointer', // Indicate clickable
                         opacity: datasetVisibility['High'] ? '1' : '0.7', // Indicator
                         transition: 'opacity 0.2s ease', // Smooth transition
@@ -685,9 +674,6 @@ const StockChart = () => {
                         border: `1px solid ${datasetVisibility['Low'] ? colors.border : colors.mutedText}`, // Indicator
                         padding: '0.4rem 0.6rem',
                         textAlign: 'center',
-                        flex: '0 0 auto',
-                        minWidth: 'auto',
-                        width: '100%',
                         cursor: 'pointer', // Indicate clickable
                         opacity: datasetVisibility['Low'] ? '1' : '0.7', // Indicator
                         transition: 'opacity 0.2s ease', // Smooth transition
@@ -702,9 +688,6 @@ const StockChart = () => {
                         border: `1px solid ${colors.border}`, // Keep default border
                         padding: '0.4rem 0.6rem',
                         textAlign: 'center',
-                        flex: '0 0 auto',
-                        minWidth: 'auto',
-                        width: '100%',
                         // Removed cursor: 'pointer' and opacity/transition for non-interactive item
                       }}>
                         <div style={{ fontSize: '0.75rem', color: colors.mutedText, marginBottom: '0.1rem' }}>Volume</div>
