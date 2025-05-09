@@ -29,6 +29,10 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::get('/stock-data/{symbol}', [MarketDataController::class, 'getStockData']);
 Route::get('/market-data/{symbol}', [MarketDataController::class, 'getMarketData']);
 
+// Analyst ratings and headlines routes
+Route::get('/analyst-ratings/{limit?}', [MarketDataController::class, 'getAnalystRatings']);
+Route::get('/headlines/{limit?}', [MarketDataController::class, 'getHeadlines']);
+
 // Add a health check endpoint
 Route::get('/health', function () {
     return response()->json(['status' => 'ok']);

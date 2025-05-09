@@ -77,4 +77,46 @@ class MarketDataController extends Controller
             'data' => $marketData
         ]);
     }
+    
+    // Get random analyst ratings
+    public function getAnalystRatings($limit = 5)
+    {
+        $ratings = DB::table('raw_analyst_ratings')
+            ->inRandomOrder()
+            ->limit($limit)
+            ->get([
+                'id',
+                'headline',
+                'url',
+                'publisher',
+                'date',
+                'stock'
+            ]);
+            
+        return response()->json([
+            'success' => true,
+            'data' => $ratings
+        ]);
+    }
+    
+    // Get random headlines
+    public function getHeadlines($limit = 5)
+    {
+        $headlines = DB::table('raw_partner_headlines')
+            ->inRandomOrder()
+            ->limit($limit)
+            ->get([
+                'id',
+                'headline',
+                'url',
+                'publisher',
+                'date',
+                'stock'
+            ]);
+            
+        return response()->json([
+            'success' => true,
+            'data' => $headlines
+        ]);
+    }
 } 

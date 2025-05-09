@@ -12,6 +12,7 @@ import {
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 import { useTheme } from './ui/ThemeProvider';
+import LiveFeed from './LiveFeed'; // Import LiveFeed component
 
 // Register ChartJS components
 ChartJS.register(
@@ -700,6 +701,9 @@ const StockChart = () => {
           )}
         </div>
       </div>
+      
+      {/* Live News Feed */}
+      <LiveFeed />
     </div>
   );
 };
